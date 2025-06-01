@@ -204,6 +204,7 @@ void libera_dicionario(Dicionario *dic) {
   free(dic);
 }
 
+
 int main() {
   int N, quant;
   scanf("%d", &N);
@@ -261,25 +262,51 @@ int main() {
       }
     }
   }
-  
+
   printf("Digite 1 se chave for um numero inteiro: ");
   int tipo_chave_buscada; scanf("%d", &tipo_chave_buscada);
-  
+
   if (tipo_chave_buscada) {
-      printf("Digite o inteiro: ");
-      int chave_buscada; scanf("%d", &chave_buscada);
-      if (busca(dic, chave_buscada, NULL)) {
-          printf("chave encontrada");
-      } else printf("chave não encontrada");
+    printf("Digite o inteiro: ");
+    int chave_buscada; scanf("%d", &chave_buscada);
+    if (busca(dic, chave_buscada, NULL)) {
+      printf("chave encontrada\n");
+    } else printf("chave não encontrada\n");
   } else {
+    char valor_str[100];
+    printf("Digite a string: ");
+    scanf("%s", valor_str);
+    char *chave_buscada = strdup(valor_str);
+    if (busca(dic, sentinela, chave_buscada)) {
+      printf("chave encontrada\n");
+    } else printf("chave não encontrada\n");
+    free(chave_buscada);
+  }
+
+  printf("Deseja remover uma chave? Digite 1 para sim, 0 para não: ");
+  int deseja_remover; 
+  scanf("%d", &deseja_remover);
+
+  if (deseja_remover) {
+    printf("Digite 1 se a chave a ser removida for um número inteiro: ");
+    int tipo_chave_remover; 
+    scanf("%d", &tipo_chave_remover);
+
+    if (tipo_chave_remover) {
+      printf("Digite o inteiro: ");
+      int chave_remover; 
+      scanf("%d", &chave_remover);
+      remover(dic, chave_remover, NULL);
+    } else {
       char valor_str[100];
       printf("Digite a string: ");
       scanf("%s", valor_str);
-      char *chave_buscada = strdup(valor_str);
-      if (busca(dic, sentinela, chave_buscada)) {
-          printf("chave encontrada");
-      } else printf("chave não encontrada");
+      char *chave_remover = strdup(valor_str);
+      remover(dic, sentinela, chave_remover);
+      free(chave_remover);
+    }
   }
+
   imprime(dic);
   libera_dicionario(dic);
 
