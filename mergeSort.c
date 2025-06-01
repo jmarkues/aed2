@@ -7,14 +7,12 @@ void merge(int *v, int inicio, int meio, int fim) {
     int n1 = meio - inicio + 1;
     int n2 = fim - meio;
 
-    // Vetores temporários com espaço para sentinela
     int *esq = malloc((n1 + 1) * sizeof(int));
     int *dir = malloc((n2 + 1) * sizeof(int));
 
     for (int i = 0; i < n1; i++) esq[i] = v[inicio + i];
     for (int j = 0; j < n2; j++) dir[j] = v[meio + 1 + j];
 
-    // Sentinelas
     esq[n1] = INT_MAX;
     dir[n2] = INT_MAX;
 
