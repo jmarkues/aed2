@@ -112,7 +112,7 @@ char *gera_string_aleatoria(int tamanho) {
 
 int main() {
     srand(time(NULL));
-    for (int N = 20000; N <= 200000; N += 20000) {
+    for (int N = 20000; N <= 100000; N += 20000) {
         Dicionario *dic = inicializa(8);
 
         // Inserção de N strings aleatórias
