@@ -176,7 +176,7 @@ void imprime(Dicionario *dic) {
   for (int i = 0; i < dic->capacidade; i++) {
     No *no = &dic->tabela[i];
     if (no->estado == OCUPADO) {
-      printf("Posição: %d ", i);
+      printf("Posicao: %d ", i);
       if (!no->chave_string) {
         printf("Chave: %d -> ", no->chave_inteiro);
         if (no->string) {
@@ -217,7 +217,7 @@ int main() {
   Dicionario *dic = inicializa(N);
 
   for (int i = 0; i < quant; i++) {
-    printf("Digite 1 se a chave for número: ");
+    printf("Digite 1 se a chave for numero ou 0 se a chave for string: ");
     int chave_tipo;
     scanf("%d", &chave_tipo);
 
@@ -226,13 +226,13 @@ int main() {
       printf("Digite a chave_int: ");
       scanf("%d", &chave_int);
 
-      printf("Digite 1 se o valor for número: ");
+      printf("Digite 1 se o valor associado a chave for numero ou 0 se o valor for string: ");
       int valor_tipo;
       scanf("%d", &valor_tipo);
 
       if (valor_tipo) {
         int valor_int;
-        printf("Digite o número: ");
+        printf("Digite o numero: ");
         scanf("%d", &valor_int);
         insere_atualiza_inteiro(dic, chave_int, NULL, valor_int);
       } else {
@@ -248,13 +248,13 @@ int main() {
       scanf("%s", chave_str);
       char *chave_copia = strdup(chave_str);
 
-      printf("Digite 1 se o valor for número: ");
+      printf("Digite 1 se o valor associado a chave for numero ou 0 se o valor for string: ");
       int valor_tipo;
       scanf("%d", &valor_tipo);
 
       if (valor_tipo) {
         int valor_int;
-        printf("Digite o número: ");
+        printf("Digite o numero: ");
         scanf("%d", &valor_int);
         insere_atualiza_string(dic, chave_copia, NULL, valor_int);
       } else {
@@ -267,26 +267,67 @@ int main() {
     }
   }
 
-  printf("Digite 1 se chave for um numero inteiro: ");
-  int tipo_chave_buscada; scanf("%d", &tipo_chave_buscada);
+  printf("Se deseja realizar uma busca, digite 1 para sim ou 0 para nao: ");
+  int deseja_buscar;
+  scanf("%d", &deseja_buscar);
 
-  if (tipo_chave_buscada) {
-    printf("Digite o inteiro: ");
-    int chave_buscada; scanf("%d", &chave_buscada);
-    if (busca(dic, chave_buscada, NULL)) {
-      printf("chave encontrada\n");
-    } else printf("chave não encontrada\n");
-  } else {
-    char valor_str[100];
-    printf("Digite a string: ");
-    scanf("%s", valor_str);
-    char *chave_buscada = strdup(valor_str);
-    if (busca(dic, sentinela, chave_buscada)) {
-      printf("chave encontrada\n");
-    } else printf("chave não encontrada\n");
-    free(chave_buscada);
+  if (deseja_buscar) {
+    printf("Digite 1 se chave a ser buscada for um numero inteiro ou 0 se a chave a ser buscada for uma string: ");
+    int tipo_chave_buscada; 
+    scanf("%d", &tipo_chave_buscada);
+
+    if (tipo_chave_buscada) {
+      printf("Digite o inteiro: ");
+      int chave_buscada; 
+      scanf("%d", &chave_buscada);
+
+      if (busca(dic, chave_buscada, NULL)) {
+        printf("chave encontrada\n");
+      } else {
+        printf("chave nao encontrada\n");
+      }
+
+    } else {
+      char valor_str[100];
+      printf("Digite a string: ");
+      scanf("%s", valor_str);
+      char *chave_buscada = strdup(valor_str);
+
+      if (busca(dic, sentinela, chave_buscada)) {
+        printf("chave encontrada\n");
+      } else {
+        printf("chave nao encontrada\n");
+      }
+
+      free(chave_buscada);
+    }
   }
 
+  printf("Se deseja remover uma chave Digite 1 para sim, 0 para nao: ");
+  int deseja_remover; 
+  scanf("%d", &deseja_remover);
+
+  if (deseja_remover) {
+    printf("Digite 1 se a chave a ser removida for um numero inteiro ou 0 se a chave a ser removida for uma string: ");
+    int tipo_chave_remover; 
+    scanf("%d", &tipo_chave_remover);
+
+    if (tipo_chave_remover) {
+      printf("Digite o inteiro: ");
+      int chave_remover; 
+      scanf("%d", &chave_remover);
+      remover(dic, chave_remover, NULL);
+    } else {
+      char valor_str[100];
+      printf("Digite a string: ");
+      scanf("%s", valor_str);
+      char *chave_remover = strdup(valor_str);
+      remover(dic, sentinela, chave_remover);
+      free(chave_remover);
+    }
+  }
+
+  printf("Imprimindo dicionario\n");
   imprime(dic);
   libera_dicionario(dic);
 
