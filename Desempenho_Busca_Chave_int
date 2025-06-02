@@ -1,0 +1,128 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+typedef enum { LIVRE, OCUPADO } Estado;
+
+typedef struct no {
+    int chave;
+    int valor;
+    Estado estado;
+} No;
+
+typedef struct dicionario {
+    No *tabela;
+    int capacidade;
+    int contador;
+} Dicionario;
+
+unsigned int hash_int(int chave, int capacidade) {
+    return (unsigned int) chave % capacidade;
+}
+
+Dicionario *inicializa(int capacidade) {
+    Dicionario *dic = malloc(sizeof(Dicionario));
+    dic->capacidade = capacidade;
+    dic->contador = 0;
+    dic->tabela = malloc(sizeof(No) * capacidade);
+    for (int i = 0; i < capacidade; i++) {
+        dic->tabela[i].estado = LIVRE;
+    }
+    return dic;
+}
+
+void redimensiona(Dicionario *dic) {
+    int nova_capacidade = dic->capacidade * 2;
+    No *nova_tabela = malloc(sizeof(No) * nova_capacidade);
+    for (int i = 0; i < nova_capacidade; i++) {
+        nova_tabela[i].estado = LIVRE;
+    }
+
+    for (int i = 0; i < dic->capacidade; i++) {
+        if (dic->tabela[i].estado == OCUPADO) {
+            unsigned int indice = hash_int(dic->tabela[i].chave, nova_capacidade);
+            while (nova_tabela[indice].estado == OCUPADO) {
+                indice = (indice + 1) % nova_capacidade;
+            }
+            nova_tabela[indice] = dic->tabela[i];
+        }
+    }
+
+    free(dic->tabela);
+    dic->tabela = nova_tabela;
+    dic->capacidade = nova_capacidade;
+}
+
+void insere(Dicionario *dic, int chave, int valor) {
+    if ((float)(dic->contador + 1) / dic->capacidade >= (2.0 / 3.0)) {
+        redimensiona(dic);
+    }
+
+    unsigned int indice = hash_int(chave, dic->capacidade);
+
+    for (int i = 0; i < dic->capacidade; i++) {
+        int pos = (indice + i) % dic->capacidade;
+        if (dic->tabela[pos].estado == LIVRE || dic->tabela[pos].chave == chave) {
+            if (dic->tabela[pos].estado == LIVRE) {
+                dic->contador++;
+            }
+            dic->tabela[pos].chave = chave;
+            dic->tabela[pos].valor = valor;
+            dic->tabela[pos].estado = OCUPADO;
+            return;
+        }
+    }
+}
+
+int busca(Dicionario *dic, int chave, int *valor) {
+    unsigned int indice = hash_int(chave, dic->capacidade);
+
+    for (int i = 0; i < dic->capacidade; i++) {
+        int pos = (indice + i) % dic->capacidade;
+        if (dic->tabela[pos].estado == LIVRE) {
+            return 0;  // Não encontrado
+        }
+        if (dic->tabela[pos].estado == OCUPADO && dic->tabela[pos].chave == chave) {
+            *valor = dic->tabela[pos].valor;
+            return 1;  // Encontrado
+        }
+    }
+    return 0;  // Não encontrado
+}
+
+void libera(Dicionario *dic) {
+    free(dic->tabela);
+    free(dic);
+}
+
+int main() {
+    int N = 1000000;  // Número de inserções
+
+    Dicionario *dic = inicializa(8);
+
+    // Inserção
+    for (int i = 0; i < N; i++) {
+        insere(dic, i, i * 10);
+    }
+
+    printf("Inseridos %d elementos.\n\n", N);
+
+    int valor;
+    for (int M = 20000; M <= 1000000; M += 20000) {
+        clock_t inicio = clock();
+
+        for (int i = 0; i < M; i++) {
+            int chave = i % N;  // Busca por chaves que existem
+            busca(dic, chave, &valor);
+        }
+
+        clock_t fim = clock();
+
+        double tempo = ((double)(fim - inicio)) / CLOCKS_PER_SEC;
+
+        printf("Tempo para realizar %6d buscas: %.6f segundos\n", M, tempo);
+    }
+
+    libera(dic);
+    return 0;
+}
