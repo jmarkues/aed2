@@ -1,0 +1,119 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+typedef enum { LIVRE, OCUPADO } Estado;
+
+typedef struct no {
+    int chave;
+    int valor;
+    Estado estado;
+} No;
+
+typedef struct dicionario {
+    No *tabela;
+    int capacidade;
+    int contador;
+} Dicionario;
+
+unsigned int hash_inteiro(int chave, int capacidade) {
+    return (unsigned int)chave % capacidade;
+}
+
+Dicionario *inicializa(int capacidade) {
+    Dicionario *dic = malloc(sizeof(Dicionario));
+    dic->capacidade = capacidade;
+    dic->contador = 0;
+    dic->tabela = malloc(sizeof(No) * capacidade);
+    for (int i = 0; i < capacidade; i++) {
+        dic->tabela[i].estado = LIVRE;
+    }
+    return dic;
+}
+
+void redimensiona(Dicionario *dic) {
+    int nova_capacidade = dic->capacidade * 2;
+    No *nova_tabela = malloc(sizeof(No) * nova_capacidade);
+    for (int i = 0; i < nova_capacidade; i++) {
+        nova_tabela[i].estado = LIVRE;
+    }
+
+    for (int i = 0; i < dic->capacidade; i++) {
+        if (dic->tabela[i].estado == OCUPADO) {
+            int chave = dic->tabela[i].chave;
+            int valor = dic->tabela[i].valor;
+            unsigned int indice = hash_inteiro(chave, nova_capacidade);
+            while (nova_tabela[indice].estado == OCUPADO) {
+                indice = (indice + 1) % nova_capacidade;
+            }
+            nova_tabela[indice].chave = chave;
+            nova_tabela[indice].valor = valor;
+            nova_tabela[indice].estado = OCUPADO;
+        }
+    }
+
+    free(dic->tabela);
+    dic->tabela = nova_tabela;
+    dic->capacidade = nova_capacidade;
+}
+
+void insere(Dicionario *dic, int chave, int valor) {
+    if ((float)(dic->contador + 1) / dic->capacidade >= (2.0/3.0)) {
+        redimensiona(dic);
+    }
+
+    unsigned int indice = hash_inteiro(chave, dic->capacidade);
+
+    for (int i = 0; i < dic->capacidade; i++) {
+        int pos = (indice + i) % dic->capacidade;
+        if (dic->tabela[pos].estado == LIVRE || dic->tabela[pos].chave == chave) {
+            dic->tabela[pos].chave = chave;
+            dic->tabela[pos].valor = valor;
+            if (dic->tabela[pos].estado == LIVRE) {
+                dic->contador++;
+                dic->tabela[pos].estado = OCUPADO;
+            }
+            return;
+        }
+    }
+}
+
+void libera(Dicionario *dic) {
+    free(dic->tabela);
+    free(dic);
+}
+
+int main() {
+    srand(time(NULL));
+
+    int tamanhos[] = {
+        20000, 40000, 60000, 80000, 100000, 120000, 140000, 160000, 180000, 200000,
+        220000, 240000, 260000, 280000, 300000, 320000, 340000, 360000, 380000, 400000,
+        420000, 440000, 460000, 480000, 500000, 520000, 540000, 560000, 580000, 600000,
+        620000, 640000, 660000, 680000, 700000, 720000, 740000, 760000, 780000, 800000,
+        820000, 840000, 860000, 880000, 900000, 920000, 940000, 960000, 980000, 1000000
+    };
+    int num_tamanhos = sizeof(tamanhos) / sizeof(tamanhos[0]);
+
+    for (int t = 0; t < num_tamanhos; t++) {
+        int N = tamanhos[t];
+        Dicionario *dic = inicializa(N);
+
+        clock_t inicio = clock();
+
+        for (int i = 0; i < N; i++) {
+            int chave = rand();
+            int valor = rand();
+            insere(dic, chave, valor);
+        }
+
+        clock_t fim = clock();
+        double tempo = (double)(fim - inicio) / CLOCKS_PER_SEC;
+
+        printf("N = %d, Tempo de insercao = %.6f segundos\n", N, tempo);
+
+        libera(dic);
+    }
+
+    return 0;
+}
