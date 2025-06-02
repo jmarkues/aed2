@@ -16,7 +16,7 @@ typedef struct dicionario {
 } Dicionario;
 
 unsigned int hash_int(int chave, int capacidade) {
-    return chave % capacidade;
+    return (unsigned int)(chave) % capacidade;
 }
 
 Dicionario *inicializa(int capacidade) {
@@ -54,7 +54,7 @@ void redimensiona(Dicionario *dic) {
 }
 
 void insere(Dicionario *dic, int chave) {
-    if ((float)(dic->contador + 1) / dic->capacidade >= (2.0/3.0)) {
+    if ((float)(dic->contador + 1) / dic->capacidade >= (2.0 / 3.0)) {
         redimensiona(dic);
     }
 
@@ -64,38 +64,49 @@ void insere(Dicionario *dic, int chave) {
         int pos = (indice + i) % dic->capacidade;
         if (dic->tabela[pos].estado == LIVRE || dic->tabela[pos].chave == chave) {
             if (dic->tabela[pos].estado == LIVRE) {
-                dic->tabela[pos].chave = chave;
                 dic->contador++;
             }
+            dic->tabela[pos].chave = chave;
             dic->tabela[pos].estado = OCUPADO;
             return;
         }
     }
 }
 
-void counting_sort(int *arr, int n, int max_val) {
-    int *count = calloc(max_val + 1, sizeof(int));
-    int *output = malloc(n * sizeof(int));
+// Função auxiliar para o Heapify
+void heapify(int arr[], int n, int i) {
+    int maior = i;
+    int esq = 2 * i + 1;
+    int dir = 2 * i + 2;
 
-    for (int i = 0; i < n; i++) {
-        count[arr[i]]++;
+    if (esq < n && arr[esq] > arr[maior])
+        maior = esq;
+
+    if (dir < n && arr[dir] > arr[maior])
+        maior = dir;
+
+    if (maior != i) {
+        int temp = arr[i];
+        arr[i] = arr[maior];
+        arr[maior] = temp;
+
+        heapify(arr, n, maior);
     }
+}
 
-    for (int i = 1; i <= max_val; i++) {
-        count[i] += count[i - 1];
-    }
+void heap_sort(int arr[], int n) {
+    // Construção do heap
+    for (int i = n / 2 - 1; i >= 0; i--)
+        heapify(arr, n, i);
 
+    // Extração dos elementos do heap
     for (int i = n - 1; i >= 0; i--) {
-        output[count[arr[i]] - 1] = arr[i];
-        count[arr[i]]--;
-    }
+        int temp = arr[0];
+        arr[0] = arr[i];
+        arr[i] = temp;
 
-    for (int i = 0; i < n; i++) {
-        arr[i] = output[i];
+        heapify(arr, i, 0);
     }
-
-    free(count);
-    free(output);
 }
 
 void libera(Dicionario *dic) {
@@ -104,15 +115,18 @@ void libera(Dicionario *dic) {
 }
 
 int main() {
-    const int max_val = 1000000;
+    srand(time(NULL));
+
     for (int N = 20000; N <= 1000000; N += 20000) {
         Dicionario *dic = inicializa(8);
 
+        // Inserção de N inteiros aleatórios
         for (int i = 0; i < N; i++) {
-            insere(dic, rand() % max_val);
+            int chave = rand();
+            insere(dic, chave);
         }
 
-        // Coletar chaves em vetor auxiliar
+        // Coleta das chaves para ordenar
         int *chaves = malloc(dic->contador * sizeof(int));
         int idx = 0;
         for (int i = 0; i < dic->capacidade; i++) {
@@ -121,15 +135,14 @@ int main() {
             }
         }
 
+        // Medição do tempo de ordenação com Heap Sort
         clock_t inicio = clock();
-
-        counting_sort(chaves, dic->contador, max_val);
-
+        heap_sort(chaves, dic->contador);
         clock_t fim = clock();
 
         double tempo = (double)(fim - inicio) / CLOCKS_PER_SEC;
 
-        printf("N = %d, Tempo de ordenacao = %.6f segundos\n", N, tempo);
+        printf("N = %d, Tempo de ordenacao (heap) = %.6f segundos\n", N, tempo);
 
         free(chaves);
         libera(dic);
