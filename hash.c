@@ -167,7 +167,7 @@ void imprime(Dicionario *dic) {
   for (int i = 0; i < dic->capacidade; i++) {
     No *aux = dic->lista[i];
     while (aux) {
-      printf("Posição: %d ", i);
+      printf("Posicao: %d ", i);
       if (!aux->chave_string) {
         printf("Chave: %d -> ", aux->chave_inteiro);
         if (aux->string) {
