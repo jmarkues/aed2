@@ -91,7 +91,7 @@ void libera(Dicionario *dic) {
 }
 
 int main() {
-    for (int N = 20000; N <= 1000000; N += 20000) {
+    for (int N = 20000; N <= 200000; N += 20000) {
         Dicionario *dic = inicializa(8);
 
         for (int i = 0; i < N; i++) {
